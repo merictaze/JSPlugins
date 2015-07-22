@@ -1,0 +1,2 @@
+# JSPlugins
+Some javascript plugins
