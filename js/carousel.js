@@ -41,36 +41,24 @@
     // slide carousel automatically
     self.interval = window.setInterval(function(){self.next();}, self.options.interval);
 
-    self.elemNext.click(function(e) {
-      restartInterval();
-      self.next();
-      return false;
-    });
-    self.elemPrev.click(function(e) {
-      restartInterval();
-      self.prev();
-      return false;
-    });
+    // set the button click listeners
+    self.elemNext.on('click', $.proxy(this.next, this));
+    self.elemPrev.on('click', $.proxy(this.prev, this));
 
-    function restartInterval(){
-      // restart the interval
-      if (self.interval) {
-        clearInterval(self.interval);
-        self.interval = window.setInterval(function(){self.next();}, self.options.interval);
-      }
-    }
   };
 
   Carousel.prototype.next = function() {
-    var self = this;
-    var nextIndex = (self.currentItemIndex+1) % self.elemSource.length;
-    self.slide(nextIndex);
+    restartInterval();
+    var nextIndex = (this.currentItemIndex+1) % this.elemSource.length;
+    this.slide(nextIndex);
+    return false;
   };
 
   Carousel.prototype.prev = function() {
-    var self = this;
-    var prevIndex = (self.currentItemIndex-1) % self.elemSource.length;
-    self.slide(prevIndex);
+    restartInterval();
+    var prevIndex = (this.currentItemIndex-1) % this.elemSource.length;
+    this.slide(prevIndex);
+    return false;
   };
 
   Carousel.prototype.slide = function(itemIndex) {
@@ -89,6 +77,14 @@
     return self;
   };
 
+  function restartInterval(){
+    // restart the interval
+    if (self.interval) {
+      clearInterval(self.interval);
+      self.interval = window.setInterval(function(){self.next();}, self.options.interval);
+    }
+  }
+    
   $.fn.carousel = function(options) {
     return this.each(function() {
       new Carousel($(this), options);

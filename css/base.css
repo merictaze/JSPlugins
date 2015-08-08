@@ -1,0 +1,39 @@
+.hide {
+  display: none !important;
+}
+
+button[disabled] {
+  color: #777;
+  cursor: default;
+  background-color: #eee !important;
+}
+
+[data-module="pagination"] ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+[data-module="carousel"]{
+  text-align: center;
+} 
+
+[data-module="carousel"] ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+[data-module="carousel"] li {
+  display: inline;
+}
+
+[data-module="carousel"] li img {
+  margin: 3px;
+  width: 80px;  
+}
+
+[data-module="carousel"] li.active img  {
+  border: 3px solid #003580;
+  margin: 0px;
+}

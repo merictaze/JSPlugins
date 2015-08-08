@@ -12,78 +12,42 @@
   };
 
   Pagination.DEFAULTS = {
-    itemsPerPage: 5
+    itemsPerPage: 4
   };
 
   Pagination.prototype.init = function(options) {
     var self = this;
     // extend default options with the ones specified by the user
     self.options = $.extend({}, Pagination.DEFAULTS, options);
-    self.elemContent = self.elem.find('li', self.elem.attr('data-target'));
+    self.elemItemsParent = self.elem.find(self.elem.attr('data-target'));
+    self.elemItems = self.elem.find('li', self.elemItemsParent);
     // pagination buttons
     self.elemPrev = self.elem.find('[data-func="prev"]');
     self.elemNext = self.elem.find('[data-func="next"]');
     self.elemSort = self.elem.find('[data-func="sort"]');
+    self.targetSort = self.elemSort.attr('data-target');
     // data to keep the sorting order
-    self.elemContent.parent().data('order', false);
+    self.elemItems.parent().data('order', false);
     // last page number to disable next button when necessary
-    self.lastPage = Math.ceil(self.elemContent.length / self.options.itemsPerPage) - 1;
+    self.lastPage = Math.ceil(self.elemItems.length / self.options.itemsPerPage) - 1;
 
-    // if number of elements is more than items per page, show pagination
-    if(self.elemContent.length > self.options.itemsPerPage){
-      self.render();
-
-      self.elemNext.click(function(e) {
-        // increment the current page, and re-render
-        self.currentPage += 1;
-        self.render();
-        return false;
-      });
-
-      self.elemPrev.click(function(e) {
-        // decrement the current page, and re-render
-        self.currentPage -= 1;
-        self.render();
-        return false;
-      });
-
-      self.elemSort.click(function(e) {
-        var parent = self.elemContent.parent();
-        var target = $(this).attr('data-target');
-        // sort the elements
-        self.elemContent.sort(function(a,b) {
-          var keyA = parseInt($(target, a).text(),0);
-          var keyB = parseInt($(target, b).text(),0);
-          if(parent.data('order')){
-            return (keyA > keyB) ? 1 : -1;
-          } else {
-            return (keyA < keyB) ? 1 : -1;
-          }
-        });
-
-        // add them back into parent
-        $.each(self.elemContent, function(index, row){
-            parent.append(row);
-        });
-
-        // update data to keep track of the sorting order
-        parent.data('order', !parent.data('order'));
-
-        // render
-        self.render();
-        return false;
-      });
-    }
+    // set the button click listeners
+    self.elemNext.on('click', $.proxy(this.next, this));
+    self.elemPrev.on('click', $.proxy(this.prev, this));
+    self.elemSort.on('click', $.proxy(this.sort, this));
+    
+    // render the module
+    self.render();
   };
 
   Pagination.prototype.render = function() {
     var self = this;
     // hide all elements
-    self.elemContent.addClass('hide');
+    self.elemItems.addClass('hide');
     // show the ones in the current page
     var start = self.currentPage*self.options.itemsPerPage;
     var end = start + self.options.itemsPerPage - 1;
-    self.elemContent.filter(function(index){
+    self.elemItems.filter(function(index){
       return index >= start && index <= end;
     }).removeClass('hide');
 
@@ -102,6 +66,46 @@
     }
   };
 
+  Pagination.prototype.next = function(e) {
+    // increment the current page, and re-render
+    this.currentPage += 1;
+    this.render();
+    return false;
+  };
+
+  Pagination.prototype.prev = function() {
+    // decrement the current page, and re-render
+    this.currentPage -= 1;
+    this.render();
+    return false;    
+  };
+
+  Pagination.prototype.sort = function() {
+    var self = this;
+    // sort the elements
+    self.elemItems.sort(function(a,b) {
+      var keyA = parseInt($(self.targetSort, a).text(),0);
+      var keyB = parseInt($(self.targetSort, b).text(),0);
+      if(self.elemItemsParent.data('order')){
+        return (keyA > keyB) ? 1 : -1;
+      } else {
+        return (keyA < keyB) ? 1 : -1;
+      }
+    });
+
+    // add them back into parent
+    $.each(self.elemItems, function(index, row){
+      self.elemItemsParent.append(row);
+    });
+
+    // update data to keep track of the sorting order
+    self.elemItemsParent.data('order', !self.elemItemsParent.data('order'));
+
+    // render
+    self.render();
+    return false;
+  };
+
   $.fn.pagination = function(options) {
     return this.each(function() {
       new Pagination($(this), options);
@@ -109,7 +113,7 @@
   };
 
 
-  $(window).on('load', function () {
+  $(window).on('load', function() {
     // for each module element in the HTML, create corresponding JS Object
     $('[data-module="pagination"]').pagination();
   });
